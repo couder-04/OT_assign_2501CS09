@@ -1,0 +1,192 @@
+
+ASSIGNMENT  —  TRANSPORTATION PROBLEM  (VAM + MODI)
+
+========================================================================
+PROBLEM STATEMENT
+========================================================================
+  Three factories ship to four warehouses.
+  Unit transportation costs, supplies and demands:
++--------+----+----+----+----+--------+
+|        | W1 | W2 | W3 | W4 | Supply |
++--------+----+----+----+----+--------+
+|   F1   | 19 | 30 | 50 | 10 |   7    |
+|   F2   | 70 | 30 | 40 | 60 |   9    |
+|   F3   | 40 | 8  | 70 | 20 |   18   |
++--------+----+----+----+----+--------+
+| Demand | 5  | 8  | 7  | 14 |        |
++--------+----+----+----+----+--------+
+  Total supply = 34  =  total demand = 34   (balanced)
+  Objective: minimize total transportation cost.
+
+========================================================================
+(i) VOGEL'S APPROXIMATION METHOD  —  Initial Basic Feasible Solution
+========================================================================
+  At each step:
+    1. Penalty of a row/column = (2nd lowest cost) - (lowest cost)
+    2. Choose the row or column with the largest penalty
+    3. Allocate as much as possible to its cheapest available cell
+    4. Cross out the exhausted row or column and repeat
+
+--- VAM Step 1 ---
+  Remaining supply: {'F1': 7, 'F2': 9, 'F3': 18}
+  Remaining demand: {'W1': 5, 'W2': 8, 'W3': 7, 'W4': 14}
+  Row penalties:    {'F1': 9, 'F2': 10, 'F3': 12}
+  Column penalties: {'W1': 21, 'W2': 22, 'W3': 10, 'W4': 10}
+  Largest penalty is COLUMN W2 = 22
+  Cheapest cell in this column: (F3, W2) cost 8
+  Allocate 8 units to (F3, W2)
+  Cross out W2 (demand exhausted).
+
+--- VAM Step 2 ---
+  Remaining supply: {'F1': 7, 'F2': 9, 'F3': 10}
+  Remaining demand: {'W1': 5, 'W3': 7, 'W4': 14}
+  Row penalties:    {'F1': 9, 'F2': 20, 'F3': 20}
+  Column penalties: {'W1': 21, 'W3': 10, 'W4': 10}
+  Largest penalty is COLUMN W1 = 21
+  Cheapest cell in this column: (F1, W1) cost 19
+  Allocate 5 units to (F1, W1)
+  Cross out W1 (demand exhausted).
+
+--- VAM Step 3 ---
+  Remaining supply: {'F1': 2, 'F2': 9, 'F3': 10}
+  Remaining demand: {'W3': 7, 'W4': 14}
+  Row penalties:    {'F1': 40, 'F2': 20, 'F3': 50}
+  Column penalties: {'W3': 10, 'W4': 10}
+  Largest penalty is ROW F3 = 50
+  Cheapest cell in this row: (F3, W4) cost 20
+  Allocate 10 units to (F3, W4)
+  Cross out F3 (supply exhausted).
+
+--- VAM Step 4 ---
+  Remaining supply: {'F1': 2, 'F2': 9}
+  Remaining demand: {'W3': 7, 'W4': 4}
+  Row penalties:    {'F1': 40, 'F2': 20}
+  Column penalties: {'W3': 10, 'W4': 50}
+  Largest penalty is COLUMN W4 = 50
+  Cheapest cell in this column: (F1, W4) cost 10
+  Allocate 2 units to (F1, W4)
+  Cross out F1 (supply exhausted).
+
+--- VAM Step 5 ---
+  Remaining supply: {'F2': 9}
+  Remaining demand: {'W3': 7, 'W4': 2}
+  Row penalties:    {'F2': 20}
+  Column penalties: {'W3': 40, 'W4': 60}
+  Largest penalty is COLUMN W4 = 60
+  Cheapest cell in this column: (F2, W4) cost 60
+  Allocate 2 units to (F2, W4)
+  Cross out W4 (demand exhausted).
+  Final allocation: 7 units to (F2, W3)
+
+VAM allocation  [cost  (quantity)]
++--------+--------+--------+--------+---------+--------+
+|        |   W1   |   W2   |   W3   |   W4    | Supply |
++--------+--------+--------+--------+---------+--------+
+|   F1   | 19 [5] | 30 [-] | 50 [-] | 10 [2]  |   7    |
+|   F2   | 70 [-] | 30 [-] | 40 [7] | 60 [2]  |   9    |
+|   F3   | 40 [-] | 8 [8]  | 70 [-] | 20 [10] |   18   |
++--------+--------+--------+--------+---------+--------+
+| Demand |   5    |   8    |   7    |   14    |        |
++--------+--------+--------+--------+---------+--------+
+
+  Number of basic cells: 6   (need m+n-1 = 3+4-1 = 6)
+  Initial transportation cost (VAM):  779
+
+========================================================================
+(ii) MODI METHOD  —  Optimality test and iterative improvement
+========================================================================
+  For every basic cell (i, j):   u_i + v_j = c_ij
+  For every non-basic cell:      d_ij = c_ij - u_i - v_j
+  MIN problem is optimal when every d_ij >= 0.
+  If some d_ij < 0, enter the most negative cell, form a closed
+  loop with basic cells, and shift theta = min of (-) positions.
+
+============================================================
+MODI Iteration 1
+============================================================
+
+Current allocation  [cost  (quantity)]
++--------+--------+--------+--------+---------+--------+
+|        |   W1   |   W2   |   W3   |   W4    | Supply |
++--------+--------+--------+--------+---------+--------+
+|   F1   | 19 [5] | 30 [-] | 50 [-] | 10 [2]  |   7    |
+|   F2   | 70 [-] | 30 [-] | 40 [7] | 60 [2]  |   9    |
+|   F3   | 40 [-] | 8 [8]  | 70 [-] | 20 [10] |   18   |
++--------+--------+--------+--------+---------+--------+
+| Demand |   5    |   8    |   7    |   14    |        |
++--------+--------+--------+--------+---------+--------+
+  Dual variables  (set u1 = 0):
+    u = {'F1': 0, 'F2': 50, 'F3': 10}
+    v = {'W1': 19, 'W2': -2, 'W3': -10, 'W4': 10}
+
+  Opportunity costs  d_ij = c_ij - u_i - v_j  (blank = basic):
++----+-------+-------+-------+-------+
+|    |  W1   |  W2   |  W3   |  W4   |
++----+-------+-------+-------+-------+
+| F1 | basic |  32   |  60   | basic |
+| F2 |   1   |  -18  | basic | basic |
+| F3 |  11   | basic |  70   | basic |
++----+-------+-------+-------+-------+
+
+  Most negative opportunity cost: d(F2, W2) = -18
+  Entering cell: (F2, W2)
+  Closed loop (alternating + / -):
+    (F2, W2)[+] -> (F2, W4)[-] -> (F3, W4)[+] -> (F3, W2)[-]
+  theta = min of (-) allocations = 2
+  Shift 2 units around the loop.
+  Cost after this iteration: 743
+
+============================================================
+MODI Iteration 2
+============================================================
+
+Current allocation  [cost  (quantity)]
++--------+--------+--------+--------+---------+--------+
+|        |   W1   |   W2   |   W3   |   W4    | Supply |
++--------+--------+--------+--------+---------+--------+
+|   F1   | 19 [5] | 30 [-] | 50 [-] | 10 [2]  |   7    |
+|   F2   | 70 [-] | 30 [2] | 40 [7] | 60 [-]  |   9    |
+|   F3   | 40 [-] | 8 [6]  | 70 [-] | 20 [12] |   18   |
++--------+--------+--------+--------+---------+--------+
+| Demand |   5    |   8    |   7    |   14    |        |
++--------+--------+--------+--------+---------+--------+
+  Dual variables  (set u1 = 0):
+    u = {'F1': 0, 'F2': 32, 'F3': 10}
+    v = {'W1': 19, 'W2': -2, 'W3': 8, 'W4': 10}
+
+  Opportunity costs  d_ij = c_ij - u_i - v_j  (blank = basic):
++----+-------+-------+-------+-------+
+|    |  W1   |  W2   |  W3   |  W4   |
++----+-------+-------+-------+-------+
+| F1 | basic |  32   |  42   | basic |
+| F2 |  19   | basic | basic |  18   |
+| F3 |  11   | basic |  52   | basic |
++----+-------+-------+-------+-------+
+
+  All d_ij >= 0.  The allocation is OPTIMAL.
+
+========================================================================
+OPTIMAL SHIPMENT PLAN
+========================================================================
+
+Optimal allocation  [cost  (quantity)]
++--------+--------+--------+--------+---------+--------+
+|        |   W1   |   W2   |   W3   |   W4    | Supply |
++--------+--------+--------+--------+---------+--------+
+|   F1   | 19 [5] | 30 [-] | 50 [-] | 10 [2]  |   7    |
+|   F2   | 70 [-] | 30 [2] | 40 [7] | 60 [-]  |   9    |
+|   F3   | 40 [-] | 8 [6]  | 70 [-] | 20 [12] |   18   |
++--------+--------+--------+--------+---------+--------+
+| Demand |   5    |   8    |   7    |   14    |        |
++--------+--------+--------+--------+---------+--------+
+
+  Positive shipments:
+      F1  ->  W1   :  5 units   (cost 19 each)
+      F1  ->  W4   :  2 units   (cost 10 each)
+      F2  ->  W2   :  2 units   (cost 30 each)
+      F2  ->  W3   :  7 units   (cost 40 each)
+      F3  ->  W2   :  6 units   (cost 8 each)
+      F3  ->  W4   :  12 units   (cost 20 each)
+
+  Minimum total transportation cost  Z*  =  743
+========================================================================

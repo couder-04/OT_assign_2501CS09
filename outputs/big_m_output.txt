@@ -1,0 +1,123 @@
+
+ASSIGNMENT  —  BIG-M SIMPLEX METHOD
+
+========================================================================
+ORIGINAL LINEAR PROGRAMMING PROBLEM
+========================================================================
+    MINIMIZE  Z = 4x1 + x2
+    subject to
+        3x1 + x2  =  3
+        4x1 + 3x2  >=  6
+        x1 + 2x2  <=  4
+        x1, x2  >=  0
+
+========================================================================
+STANDARD FORM  (slack / surplus / artificial variables)
+========================================================================
+  Slack    (s): added to  <=  constraints
+  Surplus  (p): subtracted from  >=  constraints
+  Artificial(a): added to  >=  and  =  constraints
+
+  Big-M objective (MIN):  Z = original cost  +  M * (sum of artificials)
+
+    3x1 + x2 + a1  =  3
+    4x1 + 3x2 - p1 + a2  =  6
+    x1 + 2x2 + s1  =  4
+
+  Artificial variables: a1, a2
+  Initial basis:        a1, a2, s1
+
+========================================================================
+BIG-M SIMPLEX ITERATIONS
+========================================================================
+  Optimality test:
+    MIN problem — stop when every (cj - zj) >= 0
+    Entering variable: most negative (cj - zj)
+    Leaving variable:  minimum non-negative RHS / pivot-column ratio
+
+SIMPLEX TABLEAU  —  Iteration 0    (current Z = 9M)
++---------+----+------+------+----+----+----+----+-----+
+|   BV    | cb |  x1  |  x2  | a1 | p1 | a2 | s1 | RHS |
++---------+----+------+------+----+----+----+----+-----+
+|   a1    | M  |  3   |  1   | 1  | 0  | 0  | 0  |  3  |
+|   a2    | M  |  4   |  3   | 0  | -1 | 1  | 0  |  6  |
+|   s1    | 0  |  1   |  2   | 0  | 0  | 0  | 1  |  4  |
+| cj - zj |    | 4-7M | 1-4M | 0  | M  | 0  | 0  | 9M  |
++---------+----+------+------+----+----+----+----+-----+
+
+  Entering variable: x1    (cj-zj = 4-7M)
+
+  Minimum-ratio test (leaving variable):
+  BV       RHS          pivot col    ratio       
+  a1       3            3            1           
+  a2       6            4            3/2         
+  s1       4            1            4           
+  Leaving variable:  a1
+  Pivot element:     3  at (a1, x1)
+
+SIMPLEX TABLEAU  —  Iteration 1    (current Z = 4+2M)
++---------+----+----+-----------+-----------+----+----+----+------+
+|   BV    | cb | x1 |    x2     |    a1     | p1 | a2 | s1 | RHS  |
++---------+----+----+-----------+-----------+----+----+----+------+
+|   x1    | 4  | 1  |    1/3    |    1/3    | 0  | 0  | 0  |  1   |
+|   a2    | M  | 0  |    5/3    |   -4/3    | -1 | 1  | 0  |  2   |
+|   s1    | 0  | 0  |    5/3    |   -1/3    | 0  | 0  | 1  |  3   |
+| cj - zj |    | 0  | -1/3-5/3M | -4/3+7/3M | M  | 0  | 0  | 4+2M |
++---------+----+----+-----------+-----------+----+----+----+------+
+
+  Entering variable: x2    (cj-zj = -1/3-5/3M)
+
+  Minimum-ratio test (leaving variable):
+  BV       RHS          pivot col    ratio       
+  x1       1            1/3          3           
+  a2       2            5/3          6/5         
+  s1       3            5/3          9/5         
+  Leaving variable:  a2
+  Pivot element:     5/3  at (a2, x2)
+
+SIMPLEX TABLEAU  —  Iteration 2    (current Z = 18/5)
++---------+----+----+----+--------+------+-------+----+------+
+|   BV    | cb | x1 | x2 |   a1   |  p1  |  a2   | s1 | RHS  |
++---------+----+----+----+--------+------+-------+----+------+
+|   x1    | 4  | 1  | 0  |  3/5   | 1/5  | -1/5  | 0  | 3/5  |
+|   x2    | 1  | 0  | 1  |  -4/5  | -3/5 |  3/5  | 0  | 6/5  |
+|   s1    | 0  | 0  | 0  |   1    |  1   |  -1   | 1  |  1   |
+| cj - zj |    | 0  | 0  | -8/5+M | -1/5 | 1/5+M | 0  | 18/5 |
++---------+----+----+----+--------+------+-------+----+------+
+
+  Entering variable: p1    (cj-zj = -1/5)
+
+  Minimum-ratio test (leaving variable):
+  BV       RHS          pivot col    ratio       
+  x1       3/5          1/5          3           
+  x2       6/5          -3/5         --          
+  s1       1            1            1           
+  Leaving variable:  s1
+  Pivot element:     1  at (s1, p1)
+
+SIMPLEX TABLEAU  —  Iteration 3    (current Z = 17/5)
++---------+----+----+----+--------+----+----+------+------+
+|   BV    | cb | x1 | x2 |   a1   | p1 | a2 |  s1  | RHS  |
++---------+----+----+----+--------+----+----+------+------+
+|   x1    | 4  | 1  | 0  |  2/5   | 0  | 0  | -1/5 | 2/5  |
+|   x2    | 1  | 0  | 1  |  -1/5  | 0  | 0  | 3/5  | 9/5  |
+|   p1    | 0  | 0  | 0  |   1    | 1  | -1 |  1   |  1   |
+| cj - zj |    | 0  | 0  | -7/5+M | 0  | M  | 1/5  | 17/5 |
++---------+----+----+----+--------+----+----+------+------+
+
+  All reduced costs satisfy the optimality condition.  STOP.
+
+========================================================================
+OPTIMAL SOLUTION
+========================================================================
+  Decision variables:
+      x1*  =  2/5   (0.4000)
+      x2*  =  9/5   (1.8000)
+  Slack / surplus / artificial (all artificials must be 0):
+      a1   =  0
+      p1   =  1
+      a2   =  0
+      s1   =  0
+
+  Optimal objective value:  Z*  =  17/5   (3.4000)
+========================================================================
